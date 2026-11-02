@@ -306,8 +306,19 @@ body[data-phase=battle] #leftbar, body[data-phase=battle] #panel, body[data-phas
   .mbtn { font-size: 1.25em; padding-top: 5px; padding-bottom: 5px; }
   .modal-back { padding: 6px; }
   .modal { max-height: calc(100vh - 12px); }
-  .tcountry small, #pausedTag { display: none; }
+  .tcountry small, .tcountry b, #pausedTag { display: none; }
+  .tcountry { padding: 0 8px; flex: none; }
+  #topstats { overflow-x: auto; scrollbar-width: none; }
+  #topstats::-webkit-scrollbar, #leftbar::-webkit-scrollbar { display: none; }
+  .ts { flex: none; padding: 0 8px; }
+  .tright { gap: 6px; padding: 0 6px; }
+  .sp { min-width: 28px; }
   #date { min-width: 0; padding: 3px 8px; font-size: 1.05em; }
+  /* the government column scrolls when the screen is too short for every button */
+  #leftbar { overflow-y: auto; scrollbar-width: none; padding: 4px; gap: 3px; }
+  .lb { flex: none; height: calc(36px * var(--ui)); }
+  #bottom { padding: 6px 10px; gap: 10px; }
+  .mm { padding: 2px 6px; }
   .ppalette { bottom: 46px; }
   .pside { max-height: calc(100% - 60px); }
 }
@@ -320,11 +331,7 @@ body[data-phase=battle] #leftbar, body[data-phase=battle] #panel, body[data-phas
   #pickui { top: 8px; right: 8px; max-height: calc(100vh - 16px); overflow-y: auto; }
 }
 @media (max-width: 760px) {
-  .tcountry b { display: none; }
-  .tcountry { padding: 0 8px; flex: none; }
-  #topstats { overflow-x: auto; scrollbar-width: none; }
-  .ts { flex: none; padding: 0 7px; }
-  .tright { gap: 6px; padding: 0 6px; }
+  .ts { padding: 0 7px; }
   .sp { min-width: 26px; }
   .tres, #rightbar { display: none; }
   #bottom { height: auto; max-height: 45vh; flex-direction: column; overflow-y: auto; }

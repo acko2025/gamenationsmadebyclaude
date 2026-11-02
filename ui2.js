@@ -534,8 +534,8 @@ function openSettings() {
 }
 // phones get a smaller kit on top of the player's chosen scale
 const PHONE_MQ = matchMedia('(max-width: 760px), (max-height: 520px)');
-function applyUiScale() { document.documentElement.style.setProperty('--ui', G.settings.uiScale * (PHONE_MQ.matches ? 0.8 : 1)); }
-PHONE_MQ.addEventListener('change', () => applyUiScale());
+function applyUiScale() { document.documentElement.style.setProperty('--ui', G.settings.uiScale * (!PHONE_MQ.matches ? 1 : innerHeight <= 430 ? 0.72 : 0.8)); }
+addEventListener('resize', () => applyUiScale());
 function openScenarios() {
   const idx = saveIndex();
   const m = modal('Load scenario', `<h4>Historical-style scenarios</h4><div class="scn">${SCENARIOS.map((s, i) => `<button class="scard" data-scn="${i}"><b>${s.name}</b><small>${ERAS[s.era].name} · ${s.n} nations · ${s.mapType}</small><span>${s.text}</span></button>`).join('')}</div>

@@ -1,5 +1,5 @@
 // War Of Nations offline cache. Bump VERSION (the build script does) to ship an update.
-const VERSION = 'won-20261101231157';
+const VERSION = 'won-20261101235331';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-180.png', 'ai.js', 'commands.js', 'data.js', 'flags.js', 'histmaps.js', 'net.js', 'orgs.js', 'province3d.js', 'realmaps.js', 'sim.js', 'ui.js', 'ui2.js', 'world.js', 'worlddata.js'];
 const CDN = ['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'];
 self.addEventListener('install', e => {
