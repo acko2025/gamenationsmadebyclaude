@@ -219,6 +219,7 @@ function p3Init(container) {
 function p3Resize() {
   if (!P3.renderer) return;
   const w = P3.container.clientWidth, h = P3.container.clientHeight;
+  P3.size = w + 'x' + h;
   P3.renderer.setSize(w, h); P3.camera.aspect = w / Math.max(1, h); P3.camera.updateProjectionMatrix();
 }
 function terrainColor(p, x, z, h, slope, winter) {
@@ -643,6 +644,7 @@ function p3Exit() {
 }
 function p3Frame(dt, keys) {
   if (!P3.active) return;
+  if (P3.size !== P3.container.clientWidth + 'x' + P3.container.clientHeight) p3Resize();
   if (P3.intro > 0) { P3.intro = Math.max(0, P3.intro - dt * 0.8); }
   p3Keys(dt, keys);
   // structures change as the simulation runs (construction, damage, upgrades)

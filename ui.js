@@ -987,7 +987,7 @@ function bindMapInput() {
         lastTap = dbl ? { t: 0, x: 0, y: 0 } : { t: now, x: e.clientX, y: e.clientY };
         if (dbl) { const pid = provAt(e.offsetX, e.offsetY); if (pid >= 0 && UI.phase === 'game') return enterProvince(pid); }
       }
-      mapLeftClick(e.offsetX, e.offsetY, e.shiftKey);
+      mapLeftClick(e.offsetX, e.offsetY, e.shiftKey, d.touch);
     }
   });
   mapCv.addEventListener('dblclick', e => {
@@ -1008,18 +1008,34 @@ function touchTip() {
   if (UI.touchTipped) return;
   UI.touchTipped = true; document.body.classList.add('touch');
   try { if (localStorage.getItem('won_touchtip')) return; localStorage.setItem('won_touchtip', '1'); } catch (e) { /* storage unavailable */ }
-  toast('Touch controls: pinch to zoom · drag to pan · tap to select · long-press to move or attack · double-tap to enter a province');
+  toast('Touch controls: pinch to zoom · drag to pan · tap your troops, then tap a province to move or attack · double-tap to enter a province');
 }
 function minScale() { return Math.min(mapCv.clientWidth / MW, mapCv.clientHeight / MH) * 0.9; }
 function clampView() { V.cx = clamp(V.cx, 0, MW); V.cy = clamp(V.cy, 0, MH); }
 function selectProv(pid) { V.sel = pid; G.mapDirty = true; UI.lastMap = 0; renderBottom(); if (UI.phase === 'editor') renderEditor(); if (UI.phase === 'pick') pickPhaseSelect(pid); if (UI.panel === 'build') renderPanel(true); }
-function mapLeftClick(x, y, shift) {
+function mapLeftClick(x, y, shift, touch) {
+  // fingers are imprecise: give unit counters a generous margin on touch screens
+  const pad = touch ? 10 : 0;
   for (let i = UI.unitRects.length - 1; i >= 0; i--) {
     const r = UI.unitRects[i];
-    if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
-      if (r.battle) { const b = G.battles.find(bb => bb.id === r.battle); if (b && UI.phase === 'game') openBattleDialog(b); return; }
-      if (r.owner === G.player && UI.phase === 'game') { if (!shift) UI.selDivs.clear(); r.divs.forEach(id => UI.selDivs.add(id)); renderBottom(); if (UI.panel === 'military') renderPanel(true); return; }
+    if (x >= r.x - pad && x <= r.x + r.w + pad && y >= r.y - pad && y <= r.y + r.h + pad) {
+      if (r.battle && !(touch && UI.selDivs.size)) { const b = G.battles.find(bb => bb.id === r.battle); if (b && UI.phase === 'game') openBattleDialog(b); return; }
+      if (r.owner === G.player && UI.phase === 'game') {
+        // touch: tapping the selected stack again deselects it
+        if (touch && r.divs.length && r.divs.every(id => UI.selDivs.has(id))) { UI.selDivs.clear(); renderBottom(); if (UI.panel === 'military') renderPanel(true); return; }
+        if (!shift && !touch) UI.selDivs.clear();
+        if (touch) UI.selDivs.clear();
+        r.divs.forEach(id => UI.selDivs.add(id)); renderBottom(); if (UI.panel === 'military') renderPanel(true);
+        if (touch && (UI.moveTips = (UI.moveTips || 0) + 1) <= 3) toast('Tap a province to send them there · tap the troops again to deselect');
+        return;
+      }
     }
+  }
+  // touch: with troops selected, a tap on the map is the move / attack order
+  if (touch && UI.selDivs.size && UI.phase === 'game') {
+    const pid = provAt(x, y);
+    if (pid >= 0) { showRes(cmd('move', { ids: [...UI.selDivs], p: pid })); UI.selDivs.clear(); renderBottom(); if (UI.panel === 'military') renderPanel(true); }
+    return;
   }
   const pid = provAt(x, y);
   if (!shift && UI.phase === 'game') UI.selDivs.clear();
@@ -1047,6 +1063,7 @@ let lastT = 0, acc = 0, slowT = 0, panelT = 0;
 function frame(t) {
   const dt = Math.min(0.1, (t - lastT) / 1000 || 0.016); lastT = t;
   UI.lastFrame = performance.now();
+  checkSize();
   // a multiplayer client never simulates: the host's world arrives over the network
   const running = (UI.phase === 'game' || UI.phase === 'province' || UI.phase === 'battle') && !G.paused && !isClient() && !(NET.role === 'host' ? false : document.querySelector('.modal-back.popup'));
   if (running) {
@@ -1070,8 +1087,14 @@ function frame(t) {
 }
 function resize() {
   dpr = Math.min(2, window.devicePixelRatio || 1);
-  mapCv.width = mapCv.clientWidth * dpr; mapCv.height = mapCv.clientHeight * dpr;
+  mapCv.width = Math.floor(mapCv.clientWidth * dpr); mapCv.height = Math.floor(mapCv.clientHeight * dpr);
   p3Resize();
+  G.mapDirty = true; UI.lastMap = 0;
+}
+// iOS home-screen apps do not always fire 'resize' on launch, rotation or notch changes: check every frame
+function checkSize() {
+  const d = Math.min(2, window.devicePixelRatio || 1);
+  if (d !== dpr || mapCv.width !== Math.floor(mapCv.clientWidth * d) || mapCv.height !== Math.floor(mapCv.clientHeight * d)) resize();
 }
 window.addEventListener('keydown', e => {
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
