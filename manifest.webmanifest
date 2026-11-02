@@ -1,0 +1,16 @@
+{
+  "name": "War Of Nations",
+  "short_name": "War Of Nations",
+  "description": "Grand strategy: lead a nation through the eras.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0c100e",
+  "theme_color": "#0c100e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
